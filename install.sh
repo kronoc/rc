@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 set -e
 
 # Copy the standard dot files into the correct place
@@ -58,7 +58,6 @@ sudo apt-get install \
 	dnsutils \
 	dos2unix \
 	e2fsprogs \
-	encfs \
 	etckeeper \
 	gnupg \
 	gzip \
@@ -79,7 +78,6 @@ sudo apt-get install \
 	nano \
 	netcat-traditional \
 	nmap \
-	ntp \
 	pbzip2 \
 	pwgen \
 	pv \
@@ -124,6 +122,5 @@ sudo apt-get install \
 sudo apt-get install \
     gedit \
     gnome-terminal \
-    mplayer \
-    mpd
+    mpv
 

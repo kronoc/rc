@@ -1,6 +1,7 @@
 [user]
 	name = Chris West (Faux)
 	email = git@goeswhere.com
+	signingKey = 408AE4F14EA733EF126582C1B195E1C4779BA9B2
 [core]
 	logAllRefUpdates = on
 [alias]
@@ -46,13 +47,13 @@
 	status = auto
 [rebase]
 	autosquash = true
-[url "git@goeswhere.com:"]
-	insteadOf = "reg:"
-[url "git@github.com:"]
+[url "https://github.com/"]
 	insteadOf = "gh:"
 	insteadOf = "github:"
-[url "git@github.com:FauxFaux/"]
+[url "https://github.com/FauxFaux/"]
 	insteadOf = "ghf:"
+[url "git@github.com:"]
+	pushInsteadOf = "https://github.com/"
 [push]
 	default = tracking
 [core "include"]
@@ -60,3 +61,4 @@
 
 [pull]
 	rebase = true
+[commit]

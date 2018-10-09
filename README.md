@@ -1,10 +1,10 @@
 # Installing on a clean Debian or Ubuntu machine:
 
-## Get the ability to type:
-
 ```bash
-su -c 'apt-get update && apt-get upgrade -y; apt-get install sudo git zsh tmux connect-proxy; adduser faux sudo; chsh -s /bin/zsh'
-chsh -s /bin/zsh
+sudo adduser faux
+sudo adduser faux sudo
+sudo apt install git zsh tmux connect-proxy
+sudo chsh -s /bin/zsh faux
 ```
 
 ### # proxy busting
@@ -20,7 +20,7 @@ fi
 ### # log out, log back in (with agent forwarding)
 
 ```bash
-git clone --recursive git@goeswhere.com:rc.git
+git clone --recursive git@github.com:FauxFaux/rc
 tmux
 rc/install.sh
 ```
@@ -33,6 +33,9 @@ rc/install.sh
 `for m in x-scheme-handler/http{,s} text/html; do gvfs-mime --set $m chromium-browser.desktop; done`
  * [Fixup word characters for gnome-terminal](https://bugs.launchpad.net/ubuntu/+source/gnome-terminal/+bug/1401207/comments/8),
 which has forgotten how to support urls.
+ * Consider `kernel.sysrq = 1` in `/etc/sysctl.d/10-magic-sysrq.conf`.
+ * Ensure vconsoles (ctrl+alt+f2) are enabled; `NAutoVTs` in `logind.conf`
+   or `ACTIVE_CONSOLES` in `/etc/default/console-setup`.
  * `/usr/share/xsessions/xsession.desktop`:
 
 ```ini

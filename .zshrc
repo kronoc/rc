@@ -1,5 +1,6 @@
 
 #[ Completion ]################################################################
+fpath+=~/.zfunc
 zstyle :compinstall filename '/home/faux/.zshrc'
 
 #[ Prompt ]####################################################################
@@ -40,10 +41,12 @@ alias :w='echo \"$PWD\" "$RANDOM"L, "$RANDOM"C written'
 alias acp="apt-cache policy"
 alias acs="apt-cache search"
 alias acsh="apt-cache show"
+alias acshs="apt-cache showsrc"
 alias acsno="apt-cache search --names-only"
 alias arm="sudo sudo -u debian-tor arm"
 alias cd..="cd .."
 alias clip="xclip -selection clipboard"
+alias cre="cargo run --example"
 alias encsetup='encfs ~/.encrypted/ ~/secure'
 alias g=git
 alias gb='gradle build'
@@ -53,29 +56,28 @@ alias more="less" # (More or less.)
 alias nomavennamespace="sed 's,http://maven.apache.org/[Px][Os][Md]/[^\"]*\",\",g'"
 alias rsyncpp='rsync -av --partial --progress'
 alias s="sudo"
-alias sagdup="sudo apt-get dist-upgrade"
-alias sagi="sudo apt-get install"
-alias sagr="sudo apt-get remove"
-alias sagu="sudo apt-get update"
-alias sagup="sudo apt-get upgrade"
+alias saup="sudo apt upgrade"
+alias sai="sudo apt install"
+alias sau="sudo apt update"
 alias sc="tmux attach -d"
 alias setroot="xsetroot -solid grey17"
 alias sl="ls"
 alias sortpom="mvn com.google.code.sortpom:maven-sortpom-plugin:sort -Dsort.nrOfIndentSpace=4 -Dsort.sortPlugins=groupId,artifactId -Dsort.sortDependencies=scope,groupId,artifactId"
-alias suspend="dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend"
+alias suspend="dbus-send --system --print-reply --dest=org.freedesktop.UPower /org/freedesktop/UPower org.freedesktop.UPower.Suspend"
 alias sx="screen -x"
 alias v="vim"
 
 bedword() { printf "$(printf "\\\x%02x\\\x%02x\\\x%02x\\\x%02x" $(($1&0xff)) $((($1>>8)&0xff)) $((($1>>16)&0xff)) $((($1>>24)&0xff)))" }
-cdt () { BASE=/var/tmp/$LOGNAME$(($(date +%y%m%d))); i=0; while [ -e $BASE.$i ] || ! mkdir $BASE.$i; do i=$((i+1)); done; cd $BASE.$i }
+cargo-up() { nice cargo update && nice cargo check --all && nice cargo build --all && nice cargo test --all }
+ccache-env() { export PATH=/usr/lib/ccache:$PATH CC='ccache gcc' CXX='ccache g++' }
 decompressjar() { MWD=$(pwd) && DIR=$(mktemp -d) && (cd $DIR && jar xf $MWD/$1) && rm $1 && (cd $DIR && jar 0cf $MWD/$1 .) && rm -rf $DIR; }
 decompressjarstream() { DIR=$(mktemp -d) && (cd $DIR && jar x && jar 0c .) && rm -rf $DIR; }
 deepkeys() { curl 'http://pgp.cs.uu.nl/mk_path.cgi?FROM=A482EE24&TO='$1'&PATHS=trust+paths' | egrep -o '<SMALL>[A-F0-9]{8}</SMALL>' | perl -ne 's#</?SMALL>##g; print' | sort | uniq | xargs gpg --recv-keys }
 editzshrc() { vim ~/.zshrc && source ~/.zshrc }
 gk() { gitk "$@" &disown }
 gka() { gk --all $(git log -g --format="%h" -50) "$@" }
+ghfc() { git clone --recursive https://github.com/FauxFaux/$1 }
 hometime() { (printf "echo "; fgrep gnome-screensaver-dialog /var/log/syslog | fgrep "[$USER]" | grep "$(date +'%b %e')" | head -n1 | awk '{print $3}' | sed 's/^0/ /;s/../$((&+8))/') | sh }
-idea() { nohup ~/ins/idea/bin/idea.sh "$@" &disown }
 ignore() { for f in "$@"; do echo $f >> .gitignore; done }
 jarr() { jar tf $1 | tee o && grep '[wj]ar$' o | while read f; do [ ! -e $f ] && jar xf $1 $f && jar tf $f && rm $f; done }
 kernel() { make-kpkg --rootcmd fakeroot --append_to_version=-$USER --initrd kernel_image }
@@ -96,6 +98,27 @@ wu() { (find & git ls-files -s & git log -5 & mvn pre-clean & git status & git f
 	g++ -std=c++98 -pedantic-errors -Wall -Werror -Wfatal-errors -Wwrite-strings -ftrapv -fno-merge-constants -fno-nonansi-builtins -fno-gnu-keywords -fstrict-aliasing "$1" -o"$(basename "$1" .cpp)" && "$(dirname "$1")"/"$(basename "$1" .cpp)"
 }
 
+rword() {
+    L=~/.cache/words
+    [ -f $L ] || (
+        </usr/share/dict/words LANG=C egrep '^[a-z]{4,8}$' | egrep -v 'ing$|ed$|s$' > $L
+    )
+    shuf -n1 $L
+}
+
+cdt () {
+    BASE=/var/tmp/$LOGNAME$(date +%y%m%d)
+    while true; do
+        w=$(rword)
+        if ! [ -e $BASE.$w ]; then
+            mkdir $BASE.$w
+            break
+        fi
+    done
+    cd $BASE.$w
+}
+
+
 svndeepen() {
     find "$@" -type d -empty -not \( \
         -wholename '*/tags/*' -o \
@@ -108,11 +131,6 @@ svndeepen() {
 
 
 setopt incappendhistory autocd extendedglob nomatch notify interactivecomments
-
-fpath=(~/rc/zsh-git-escape-magic $fpath)
-
-autoload -Uz git-escape-magic
-git-escape-magic
 
 autoload -Uz compinit
 compinit
@@ -133,8 +151,8 @@ bindkey '\e[A' history-beginning-search-backward-end
 bindkey '\e[B' history-beginning-search-forward-end
 
 HISTFILE=~/.histfile
-HISTSIZE=5000
-SAVEHIST=5000
+HISTSIZE=50000
+SAVEHIST=50000
 
 #[ Exports ]###################################################################
 export EDITOR="vim"
@@ -155,9 +173,9 @@ export REPORTTIME=10
 export LESS='-i -w -q -z-4 -g -M -X -F -R -P%t?f%f:stdin .?pb%pb\%:?lbLine %lb:?bbByte %bb:-...'
 #export LESS="-cgiFx4M"
 export PAGER=less
-export GOPATH=$HOME/gocode
+export GOPATH=$HOME/go
 export PATH="$HOME/bin/:$HOME/.cabal/bin:$HOME/usr/bin:$PATH:$GOPATH/bin"
-export PYTHONPATH=$PYTHONPATH:$HOME/lib/python
+export PYTHONPATH=$PYTHONPATH:$HOME/lib/python3.6/site-packages:$HOME/lib/python2.7/site-packages:$HOME/lib/python2.7/dist-packages:$HOME/lib/python
 export LD_LIBRARY_PATH=~/lib
 
 bindkey "^[[1~" beginning-of-line
